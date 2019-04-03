@@ -61,7 +61,10 @@ start32:
 	movw    %ax, %gs
 
 	# Set up initial page table. We cannot use kern_pgdir yet because
-	# we are still running at a low EIP.
+	# we are still running at a low EIP.   
+	# my comment: I think kern_pgdir is ok, because bsp has built kern_pgdir.
+	#             actually, kern_pgdir and entry_pgdir have no difference now,
+	#             both are data structures in memmory.
 	movl    $(RELOC(entry_pgdir)), %eax
 	movl    %eax, %cr3
 	# Turn on paging.

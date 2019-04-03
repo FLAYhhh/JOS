@@ -109,6 +109,7 @@ boot_alloc(uint32_t n)
 	nextfree = ROUNDUP(nextfree+n, PGSIZE);
 	if(PADDR(nextfree) > (npages<<PGSHIFT))
 		panic("boot_alloc: Out of mem\n");
+	memset(result, 0, n);
 	return result;
 }
 
@@ -275,7 +276,12 @@ mem_init_mp(void)
 	//     Permissions: kernel RW, user NONE
 	//
 	// LAB 4: Your code here:
-
+	int i=0;
+	uintptr_t va = KSTACKTOP;
+	for(; i<NCPU; i++){
+		boot_map_region(kern_pgdir, va-KSTKSIZE, KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
+		va -= (KSTKSIZE + KSTKGAP);
+	}
 }
 
 // --------------------------------------------------------------
@@ -318,8 +324,9 @@ page_init(void)
 	for (i = 0; i < npages; i++) {
 		pages[i].pp_ref = 0;
 		pages[i].pp_link = page_free_list;
-		if(i==0 || (i*PGSIZE >=IOPHYSMEM && i*PGSIZE<EXTPHYSMEM) 
-		|| ( i*PGSIZE>=EXTPHYSMEM && i*PGSIZE< PADDR(boot_alloc(0)) ) 
+		if(i==0 || (MPENTRY_PADDR <= i*PGSIZE && i*PGSIZE < MPENTRY_PADDR + PGSIZE)  
+		|| (IOPHYSMEM <= i*PGSIZE  && i*PGSIZE<EXTPHYSMEM) 
+		|| ( EXTPHYSMEM <= i*PGSIZE && i*PGSIZE< PADDR(boot_alloc(0)) ) 
 		){
 			// not free, do nothing
 		}else{
@@ -588,7 +595,13 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+	uintptr_t addr_ret = base;
+	assert(pa%PGSIZE == 0);
+	boot_map_region(kern_pgdir, base, ROUNDUP(size, PGSIZE), pa, PTE_W|PTE_PCD|PTE_PWT);
+	base += ROUNDUP(size, PGSIZE);
+	if(base > MMIOLIM) panic("mmio_map_region: beyond MMIOLIM!\n");
+	return (void*)addr_ret;
+	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;
@@ -620,7 +633,7 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 	addr_end = ROUNDUP( addr + len, PGSIZE);
 	for(; addr < addr_end; addr += PGSIZE){
 		pte_t *ptep = pgdir_walk(env->env_pgdir, addr, 0);
-		if((*ptep & perm)!=perm){
+		if(ptep == NULL || (*ptep & perm)!=perm){
 			if(addr == ROUNDDOWN(va,PGSIZE)) user_mem_check_addr = (uintptr_t)va;
 			else user_mem_check_addr = (uintptr_t)addr;
 			return -E_FAULT;

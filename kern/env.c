@@ -489,7 +489,7 @@ env_pop_tf(struct Trapframe *tf)
 {
 	// Record the CPU we are running on for user-space debugging
 	curenv->env_cpunum = cpunum();
-
+	unlock_kernel();
 	asm volatile(
 		"\tmovl %0,%%esp\n"
 		"\tpopal\n"
@@ -537,6 +537,7 @@ env_run(struct Env *e)
 	e->env_runs = 0;
 	lcr3(PADDR(e->env_pgdir));
 
+	// unlock_kernel in env_pop_tf()
 	env_pop_tf(&(e->env_tf));
 	panic("env_run not yet implemented");
 }
