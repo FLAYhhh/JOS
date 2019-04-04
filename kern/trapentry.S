@@ -42,6 +42,16 @@
 	pushl $(num);							\
 	jmp _alltraps
 
+#define INTHANDLER_NOEC(name, num)					\
+	.globl name;							\
+	.type name, @function;						\
+	.align 2;							\
+	name:								\
+	cli;                \
+  pushl $0;							\
+	pushl $(num);							\
+	jmp _alltraps
+
 .text
 
 /*
@@ -82,23 +92,23 @@ TRAPHANDLER_NOEC(vector28, 28);
 TRAPHANDLER_NOEC(vector29, 29);
 TRAPHANDLER_NOEC(vector30, 30);
 TRAPHANDLER_NOEC(vector31, 31);
-TRAPHANDLER_NOEC(vector32, 32);
-TRAPHANDLER_NOEC(vector33, 33);
-TRAPHANDLER_NOEC(vector34, 34);
-TRAPHANDLER_NOEC(vector35, 35);
-TRAPHANDLER_NOEC(vector36, 36);
-TRAPHANDLER_NOEC(vector37, 37);
-TRAPHANDLER_NOEC(vector38, 38);
-TRAPHANDLER_NOEC(vector39, 39);
-TRAPHANDLER_NOEC(vector40, 40);
-TRAPHANDLER_NOEC(vector41, 41);
-TRAPHANDLER_NOEC(vector42, 42);
-TRAPHANDLER_NOEC(vector43, 43);
-TRAPHANDLER_NOEC(vector44, 44);
-TRAPHANDLER_NOEC(vector45, 45);
-TRAPHANDLER_NOEC(vector46, 46);
-TRAPHANDLER_NOEC(vector47, 47);
-TRAPHANDLER_NOEC(vector48, 48);
+INTHANDLER_NOEC(vector32, 32);
+INTHANDLER_NOEC(vector33, 33);
+INTHANDLER_NOEC(vector34, 34);
+INTHANDLER_NOEC(vector35, 35);
+INTHANDLER_NOEC(vector36, 36);
+INTHANDLER_NOEC(vector37, 37);
+INTHANDLER_NOEC(vector38, 38);
+INTHANDLER_NOEC(vector39, 39);
+INTHANDLER_NOEC(vector40, 40);
+INTHANDLER_NOEC(vector41, 41);
+INTHANDLER_NOEC(vector42, 42);
+INTHANDLER_NOEC(vector43, 43);
+INTHANDLER_NOEC(vector44, 44);
+INTHANDLER_NOEC(vector45, 45);
+INTHANDLER_NOEC(vector46, 46);
+INTHANDLER_NOEC(vector47, 47);
+INTHANDLER_NOEC(vector48, 48);
 
 
 /*

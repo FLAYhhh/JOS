@@ -311,7 +311,48 @@ static int
 sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 {
 	// LAB 4: Your code here.
-	panic("sys_ipc_try_send not implemented");
+
+	struct Env *dstenv;
+	int r;
+	
+	r = envid2env(envid, &dstenv, 0);
+	if(r==-E_BAD_ENV) return -E_BAD_ENV;
+	
+	if(dstenv->env_ipc_recving == 0) return -E_IPC_NOT_RECV;
+
+	dstenv->env_ipc_recving = 0;
+	dstenv->env_ipc_from = curenv->env_id;
+	dstenv->env_ipc_value = value;
+
+	if(dstenv->env_ipc_dstva >= (void*)UTOP){  // reciver doesn't want page map
+		//don't perferm any check and map
+		dstenv->env_ipc_perm = 0;
+	}else if(srcva < (void*)UTOP){
+		if((uintptr_t)srcva % PGSIZE != 0) return -E_INVAL;
+
+		pte_t *ptep;
+		struct PageInfo *pp;
+		pp = page_lookup(curenv->env_pgdir, srcva, &ptep);
+		if(pp==NULL) return -E_INVAL;
+
+		if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+
+		if((perm&PTE_W) && (!((*ptep)&PTE_W))) return -E_INVAL;
+		
+		r = page_insert(dstenv->env_pgdir, pp, dstenv->env_ipc_dstva, perm);
+		if(r==-E_NO_MEM) return -E_NO_MEM;
+
+		dstenv->env_ipc_perm = perm;
+	}else{
+		dstenv->env_ipc_perm = 0;
+	}
+
+
+
+	dstenv->env_status = ENV_RUNNABLE;
+
+	return 0;
+	//panic("sys_ipc_try_send not implemented");
 }
 
 // Block until a value is ready.  Record that you want to receive
@@ -329,7 +370,13 @@ static int
 sys_ipc_recv(void *dstva)
 {
 	// LAB 4: Your code here.
-	panic("sys_ipc_recv not implemented");
+	//assert((uintptr_t)dstva < UTOP);
+	if((uintptr_t)dstva < UTOP && (uintptr_t)dstva % PGSIZE) return -E_INVAL;
+
+	curenv->env_status = ENV_NOT_RUNNABLE;
+	curenv->env_ipc_recving = 1;
+	curenv->env_ipc_dstva = dstva;
+	//panic("sys_ipc_recv not implemented");
 	return 0;
 }
 
@@ -375,6 +422,12 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			break;
 		case SYS_env_set_pgfault_upcall:
 			return sys_env_set_pgfault_upcall(a1, (void*)a2);
+			break;
+		case SYS_ipc_recv:
+			return sys_ipc_recv((void*)a1);
+			break;
+		case SYS_ipc_try_send:
+			return sys_ipc_try_send(a1, a2, (void*)a3, a4);
 			break;
 		default:
 			return -E_INVAL;

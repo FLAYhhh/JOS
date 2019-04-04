@@ -88,7 +88,7 @@ duppage(envid_t envid, unsigned pn)
 //   so you must allocate a new page for the child's user exception stack.
 //
 envid_t
-fork(void)
+fork(void)   //basicly done, except some bit checks.
 {
 	// LAB 4: Your code here.
 	set_pgfault_handler(pgfault);

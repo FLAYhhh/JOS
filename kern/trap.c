@@ -73,8 +73,11 @@ trap_init(void)
 
 	// LAB 3: Your code here.
 	int i;
-	for(i=0; i<20; i++){
+	for(i=0; i<48; i++){
 		SETGATE(idt[i], 0, GD_KT, vectors[i], 0);
+	}
+	for(i=IRQ_OFFSET; i<IRQ_OFFSET+16; i++){
+		SETGATE(idt[i], 0, GD_KT, vectors[i], 0);		
 	}
 	SETGATE(idt[T_BRKPT], 0, GD_KT, vectors[T_BRKPT], 3);
 	SETGATE(idt[T_SYSCALL], 1, GD_KT, vectors[T_SYSCALL], 3);
@@ -211,11 +214,11 @@ trap_dispatch(struct Trapframe *tf)
 		int r = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx,
 		tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
 		tf->tf_regs.reg_eax = r;
-		if(r>=0)
-		{
+		//if(r>=0)
+		//{
 			//cprintf("<envid: %08x> <syscallno: [%d] %s returned successfully!>\n",curenv->env_id, sysno, syscall_tab[sysno]);
-			return;
-		}
+		return;
+		//}
 		//cprintf("trap_dispatch: syscall return error: %e\n", r);
 	}
 	
@@ -231,7 +234,11 @@ trap_dispatch(struct Trapframe *tf)
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
 	// LAB 4: Your code here.
-
+	if (tf->tf_trapno == IRQ_OFFSET + IRQ_TIMER){
+		//cprintf("handle IRQ_TIMER\n");
+		lapic_eoi();
+		sched_yield();
+	}
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT)
