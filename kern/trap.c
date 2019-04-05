@@ -326,6 +326,7 @@ page_fault_handler(struct Trapframe *tf)
 	// LAB 3: Your code here.
 
 	if(!(tf->tf_cs & 1)){  // kern
+		print_trapframe(tf);
 		panic("kernel page fault !\n");
 	}else{
 		cprintf("user page fault, and will be handled or not.\n");

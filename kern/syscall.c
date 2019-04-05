@@ -191,7 +191,9 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 
 	if((uintptr_t)va >= UTOP || (uintptr_t)va % PGSIZE != 0) return -E_INVAL;
 
-	if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+//	if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+	if(!(perm&PTE_U && perm&PTE_P)) return -E_INVAL;
+	if(perm & (~PTE_SYSCALL)) return -E_INVAL;
 
 	struct PageInfo *pp;
 	pp = page_alloc(ALLOC_ZERO);
@@ -246,7 +248,10 @@ sys_page_map(envid_t srcenvid, void *srcva,
 	pp = page_lookup(srcenv->env_pgdir, srcva, &ptep);
 	if(pp==NULL) return -E_INVAL;
 
-	if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+	//if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+	if(!(perm&PTE_U && perm&PTE_P)) return -E_INVAL;
+	if(perm & (~PTE_SYSCALL)) return -E_INVAL;
+
 
 	if((perm&PTE_W) && (!((*ptep)&PTE_W))) return -E_INVAL;
 

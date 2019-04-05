@@ -3,7 +3,7 @@
 const char *msg = "This is the NEW message of the day!\n\n";
 
 #define FVA ((struct Fd*)0xCCCCC000)
-
+#define debug 1
 static int
 xopen(const char *path, int mode)
 {
@@ -103,6 +103,9 @@ umain(int argc, char **argv)
 		panic("creat /big: %e", f);
 	memset(buf, 0, sizeof(buf));
 	for (i = 0; i < (NDIRECT*3)*BLKSIZE; i += sizeof(buf)) {
+		if(debug)
+			cprintf("testfile.c:(try files with indirect blocks)\n"
+			"\tfilebno = %d\n", i/BLKSIZE);
 		*(int*)buf = i;
 		if ((r = write(f, buf, sizeof(buf))) < 0)
 			panic("write /big@%d: %e", i, r);
