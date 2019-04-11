@@ -22,6 +22,8 @@ sys_cputs(const char *s, size_t len)
 	// Destroy the environment if not.
 
 	// LAB 3: Your code here.
+	if(!curenv)
+		panic("sys_cputs: no current env\n");
 	user_mem_assert(curenv, s, len, PTE_U|PTE_P);
 	// Print the string supplied by the user.
 	cprintf("%.*s", len, s);
@@ -133,7 +135,23 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	// LAB 5: Your code here.
 	// Remember to check whether the user has supplied us with a good
 	// address!
-	panic("sys_env_set_trapframe not implemented");
+
+	struct Env *env;
+	int r = envid2env(envid, &env, 1);
+	if(r<0) return r;
+
+	//!!!! this is a big bug!!!!!
+	// the first arg of user_mem_assert should be a point to struct env.
+	user_mem_assert(env, (void*)tf, sizeof(struct Trapframe), PTE_P | PTE_U);
+
+
+	assert( ((tf->tf_cs & 0x11) == 0x11)
+			&& (tf->tf_eflags & FL_IF)
+			&& ((tf->tf_eflags & FL_IOPL_3) == 0)
+		  );
+	env->env_tf = *tf;
+	return 0;
+	//panic("sys_env_set_trapframe not implemented");
 }
 
 // Set the page fault upcall for 'envid' by modifying the corresponding struct
@@ -352,7 +370,10 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 		pp = page_lookup(curenv->env_pgdir, srcva, &ptep);
 		if(pp==NULL) return -E_INVAL;
 
-		if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+		//if(!((perm&PTE_U) && (perm&PTE_P) && !(perm&(~(PTE_U | PTE_P | PTE_AVAIL | PTE_W ))))) return -E_INVAL;
+		//careful
+		if(!(perm&PTE_U && perm&PTE_P)) return -E_INVAL;
+		if(perm & (~PTE_SYSCALL)) return -E_INVAL;
 
 		if((perm&PTE_W) && (!((*ptep)&PTE_W))) return -E_INVAL;
 		
@@ -403,7 +424,7 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 {
 	// Call the function corresponding to the 'syscallno' parameter.
 	// Return any appropriate return value.
-	// LAB 3: Your code here.
+	// LAB 3: Your code here.11
 	switch (syscallno){
 		case SYS_cputs:
 			sys_cputs((char*)a1, a2);
@@ -445,6 +466,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			break;
 		case SYS_ipc_try_send:
 			return sys_ipc_try_send(a1, a2, (void*)a3, a4);
+			break;
+		case SYS_env_set_trapframe:
+			return sys_env_set_trapframe(a1, (struct Trapframe *)a2);
 			break;
 		default:
 			return -E_INVAL;

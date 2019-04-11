@@ -25,8 +25,11 @@ pgfault(struct UTrapframe *utf)
 	//   (see <inc/memlayout.h>).
 
 	// LAB 4: Your code here.
-	if( !((((pde_t*)UVPT)[PDX(addr)] & PTE_COW) && (err&2))){
-		//panic("pafault: not (write to cow) \n");
+	cprintf("pgfault: addr = %08x\n", addr);
+	assert(uvpt[(uint32_t)addr/PGSIZE] & PTE_P);
+	assert(uvpt[(uint32_t)addr/PGSIZE] & PTE_U);
+	if( !( uvpt[(uint32_t)addr/PGSIZE] & PTE_COW) ){
+		panic("pafault: not (write to cow) \n");
 	}
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
@@ -63,12 +66,28 @@ static int
 duppage(envid_t envid, unsigned pn)
 {
 	int r;
-
+	
 	// LAB 4: Your code here.
-	sys_page_map(0, (void*)(pn*PGSIZE), envid, (void*)(pn*PGSIZE), PTE_P | PTE_U | PTE_AVAIL);	
-	sys_page_map(envid, (void*)(pn*PGSIZE), 0, (void*)(pn*PGSIZE), PTE_P | PTE_U | PTE_AVAIL);
+	//if((uvpt[pn] & PTE_P) == 0) return 0;
+	assert(uvpt[pn] & PTE_P);
+	if(uvpt[pn] & PTE_SHARE){
+		r = sys_page_map(0, (void*)(pn*PGSIZE), envid, (void*)(pn*PGSIZE), PTE_SYSCALL & uvpt[pn]);
+		if(r<0) return r;
+		return 0;
+	}
+	if((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)){
+		r = sys_page_map(0, (void*)(pn*PGSIZE), envid, (void*)(pn*PGSIZE), (PTE_SYSCALL & uvpt[pn]) | PTE_COW);	
+		if(r<0) return r;
+		r = sys_page_map(envid, (void*)(pn*PGSIZE), 0, (void*)(pn*PGSIZE), (PTE_SYSCALL & uvpt[pn]) | PTE_COW);
+		if(r<0) return r;
+
+		return 0;
+	} 
+
+	r = sys_page_map(0, (void*)(pn*PGSIZE), envid, (void*)(pn*PGSIZE), PTE_SYSCALL & uvpt[pn]);
+	return r;
 	//panic("duppage not implemented");
-	return 0;
+	//return 0;
 }
 
 //
@@ -100,7 +119,7 @@ fork(void)   //basicly done, except some bit checks.
 	extern unsigned char end[];
 	uint8_t *addr;
 	int r;
-	
+	cprintf("user end addr is %08x\n", (uint8_t*)end);
 	if(envid==0){
 		//child
 		set_pgfault_handler(pgfault);
@@ -111,7 +130,43 @@ fork(void)   //basicly done, except some bit checks.
 		for(addr = (void*)UTEXT; addr < end; addr += PGSIZE){
 			duppage(envid, (uintptr_t)addr/PGSIZE);
 		}
-	
+
+		int r;
+		//char *strp = (char *)0xA0000000;
+		//int strpgno = (uint32_t)strp/PGSIZE;
+		int pn=0, maxpn = UTOP/PGSIZE;
+		//cprintf("strpgno = %d\n", strpgno);
+		
+		for(pn=0;pn<maxpn;pn++){
+			if(!(uvpd[PDX(pn*PGSIZE)] & PTE_P))
+				continue;
+			//cprintf("pn = %d\n", pn);
+			if(uvpt[pn] & PTE_SHARE){
+				//cprintf("va[%08x] is shared\n", pn*PGSIZE);
+		 		if(uvpt[pn] & PTE_P){
+					//cprintf("va is valid\n");
+					r = sys_page_map(0, (void*)(pn*PGSIZE), envid, (void*)(pn*PGSIZE), PTE_SYSCALL & uvpt[pn]);
+				}else{
+					//cprintf("va is invalid\n");
+				}
+			}else{
+//				cprintf("va is not shared\n");
+			}
+		}
+		//cprintf("strpgno = %d\n", strpgno);
+		// if(uvpt[strpgno]&PTE_P){
+		// 	cprintf("va is valid\n");
+		// 	if(uvpt[strpgno] & PTE_SHARE){
+		// 		cprintf("va is shared\n");
+		// 		r = sys_page_map(0, (void*)(strp), envid, (void*)strp, PTE_SYSCALL & uvpt[strpgno]);
+		// 		if(r<0) return r;
+		// 	}
+		// 	else{
+		// 		cprintf("va is not shared");
+		// 	}
+		// }else{
+		// 	cprintf("va is invalid\n");
+		// }
 
 		void *stack_va  = ROUNDDOWN(&addr, PGSIZE);
 		sys_page_alloc(envid, stack_va, PTE_P | PTE_U | PTE_W);

@@ -632,12 +632,14 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 	addr = ROUNDDOWN(addr, PGSIZE);
 	addr_end = ROUNDUP( addr + len, PGSIZE);
 	for(; addr < addr_end; addr += PGSIZE){
-		pte_t *ptep = pgdir_walk(env->env_pgdir, addr, 0);
-		if(ptep == NULL || (*ptep & perm)!=perm){
+		//pte_t *ptep = pgdir_walk(env->env_pgdir, addr, 0);
+		//if(ptep == NULL || (*ptep & perm)!=perm){
+		if(	!(env->env_pgdir[PDX(addr)] & PTE_P)
+			||(((uint32_t *)UVPT)[(uintptr_t)addr/PGSIZE] & perm) != perm){
 			if(addr == ROUNDDOWN(va,PGSIZE)) user_mem_check_addr = (uintptr_t)va;
 			else user_mem_check_addr = (uintptr_t)addr;
 			return -E_FAULT;
-		}
+		}	
 	}
 	return 0;
 }
