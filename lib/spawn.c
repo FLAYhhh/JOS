@@ -137,11 +137,11 @@ spawn(const char *prog, const char **argv)
 	//child_tf.tf_eflags |= FL_IOPL_3;   // devious: see user/faultio.c
 	if ((r = sys_env_set_trapframe(child, &child_tf)) < 0)
 		panic("sys_env_set_trapframe: %e", r);
-	cprintf("set tf\n");
+	//cprintf("set tf\n");
 	if ((r = sys_env_set_status(child, ENV_RUNNABLE)) < 0)
 		panic("sys_env_set_status: %e", r);
 
-	cprintf("spawn\n");
+	//cprintf("spawn\n");
 	return child;
 
 error:
