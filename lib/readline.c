@@ -16,7 +16,8 @@ readline(const char *prompt)
 	if (prompt != NULL)
 		fprintf(1, "%s", prompt);
 #endif
-
+	//cprintf("%s", prompt);
+	
 	i = 0;
 	echoing = iscons(0);
 	while (1) {
