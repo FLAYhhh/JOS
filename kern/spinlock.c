@@ -84,7 +84,6 @@ spin_unlock(struct spinlock *lk)
 {
 // #ifdef DEBUG_SPINLOCK
 // 	if (!holding(lk)) {
-// 		cprintf("In debug_spinlock - spin_unlock\n");
 // 		int i;
 // 		uint32_t pcs[10];
 // 		// Nab the acquiring EIP chain before it gets released

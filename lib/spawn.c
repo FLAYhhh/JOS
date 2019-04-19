@@ -308,35 +308,47 @@ static int
 copy_shared_pages(envid_t child)
 {
 	// LAB 5: Your code here.
+	// uintptr_t addr;
+	// uint32_t pn;
+	// pte_t pte;
+	// int r;
 
+	// for(addr = 0; addr<UTOP; addr+=PGSIZE){
+	// 	pn = addr/PGSIZE;
+	// 	if(!(uvpd[PDX(addr)]&PTE_P))
+	// 		continue;
+	// 	pte = uvpt[pn];
+	// 	if((pte & (PTE_SHARE | PTE_P | PTE_U)) == (PTE_SHARE | PTE_P | PTE_U)){
+	// 		r = sys_page_map(0, (void*)addr, child, (void*)addr, PTE_SYSCALL & pte);
+	// 		if(r<0) panic("copy_shared_pages: sys_page_map,%e", r);
+	// 	}		
+	// }
+	// return 0;
+		// LAB 5: Your code here.
 	int r;
-	int pn = 0, maxpn = UTOP/PGSIZE;
-	//char *strp = (char *)0xA0000000;
-	// int strpgno = (uint32_t)strp/PGSIZE;
-	if( (uvpd[PDX(pn*PGSIZE)] & PTE_P)
-		&&(uvpt[pn] & PTE_P)
-		&&(uvpt[pn] & PTE_SHARE)
-		){
-	
-		cprintf("va is valid and shared\n");
-		r = sys_page_map(0, (void*)(pn*PGSIZE), child, (void*)(pn*PGSIZE), PTE_SYSCALL & uvpt[pn]);	
-		if(r<0) return r;
+	bool is_below_ulim = true;
+	for (int i = 0; is_below_ulim && i < NPDENTRIES ; i++) {
+		if (!(uvpd[i] & PTE_P)) {
+			continue;
+		}
+		for (int j = 0; is_below_ulim && j < NPTENTRIES; j++) {
+			unsigned pn = i * NPTENTRIES + j;
+			pte_t pte = uvpt[pn];
+			if (pn >= (UTOP >> PGSHIFT)) {
+				is_below_ulim = false;
+			} else if (pte & PTE_SHARE) {
+				if ((r = sys_page_map(0,
+						      (void *)(pn * PGSIZE),
+						      child,
+						      (void *)(pn * PGSIZE),
+						      pte & PTE_SYSCALL)) < 0) {
+					return r;
+				}
+			}
+		}
 	}
 
-	//panic("copy_shared_pages not implemented!\n");
-	//void *addr;
-	//extern unsigned char end[];
-	//int r;
-
-	// for(addr = (void*)0; (uintptr_t)addr < UTOP; addr += PGSIZE){
-	// 	uint32_t pn = (uintptr_t)addr/PGSIZE;
-	// 	if(uvpt[pn]&PTE_SHARE
-	// 	   && uvpt[pn]&PTE_P){
-	// 		//duppage(child, (uintptr_t)addr/PGSIZE);
-	// 		r = sys_page_map(0, (void*)(pn*PGSIZE), child, (void*)(pn*PGSIZE), PTE_SYSCALL & uvpt[pn]);
-	// 		if(r<0) return r;
-	// 	}
-	// }
 	return 0;
+
 }
 

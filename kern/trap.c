@@ -241,20 +241,14 @@ trap_dispatch(struct Trapframe *tf)
 	}
 	// Handle keyboard and serial interrupts.
 	// LAB 5: Your code here.
-
 	if (tf->tf_trapno == IRQ_OFFSET + IRQ_KBD){
-		//cprintf("handle IRQ_TIMER\n");
-		lapic_eoi();
 		kbd_intr();
-		return;
+		return ;
 	}
 	if (tf->tf_trapno == IRQ_OFFSET + IRQ_SERIAL){
-		//cprintf("handle IRQ_TIMER\n");
-		lapic_eoi();
 		serial_intr();
-		return;		
+		return ;
 	}
-
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT)
@@ -378,6 +372,11 @@ page_fault_handler(struct Trapframe *tf)
 
 	// LAB 4: Your code here.
 	
+	//pgfault_handle 进行处理时必须要使用exception stack,
+	//所以使用exception stack时不能出现pgfault.否则,就会一直递归下去.
+	//对于单个进程,在第一次安装pgfault handle时必须进行exception stack的分配.
+	//在fork时,不能将xstack标记为cow,必须显示的复制一份.
+
 	if(curenv->env_pgfault_upcall == NULL){
 		// do nothing
 	}
