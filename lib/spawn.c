@@ -91,7 +91,8 @@ spawn(const char *prog, const char **argv)
 
 	// Read elf header
 	elf = (struct Elf*) elf_buf;
-	if (readn(fd, elf_buf, sizeof(elf_buf)) != sizeof(elf_buf)
+	ssize_t n = readn(fd, elf_buf, sizeof(elf_buf));
+	if ( n != sizeof(elf_buf)
 	    || elf->e_magic != ELF_MAGIC) {
 		close(fd);
 		cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
@@ -102,6 +103,7 @@ spawn(const char *prog, const char **argv)
 	if ((r = sys_exofork()) < 0)
 		return r;
 	child = r;
+	//cprintf("spawn.c:105:sys_exofork success\n");
 
 	// Set up trap frame, including initial stack.
 	child_tf = envs[ENVX(child)].env_tf;
@@ -109,6 +111,7 @@ spawn(const char *prog, const char **argv)
 
 	if ((r = init_stack(child, argv, &child_tf.tf_esp)) < 0)
 		return r;
+	//cprintf("spawn.c:113:set up tf & init stack\n");
 
 	// Set up program segments as defined in ELF header.
 	ph = (struct Proghdr*) (elf_buf + elf->e_phoff);
@@ -124,18 +127,21 @@ spawn(const char *prog, const char **argv)
 	}
 	close(fd);
 	fd = -1;
+	//cprintf("set up prog segments\n");
 
 	// Copy shared library state.
 	if ((r = copy_shared_pages(child)) < 0)
 		panic("copy_shared_pages: %e", r);
+	//cprintf("copy shared\n");
 
-	child_tf.tf_eflags |= FL_IOPL_3;   // devious: see user/faultio.c
+	//child_tf.tf_eflags |= FL_IOPL_3;   // devious: see user/faultio.c
 	if ((r = sys_env_set_trapframe(child, &child_tf)) < 0)
 		panic("sys_env_set_trapframe: %e", r);
-
+	//cprintf("set tf\n");
 	if ((r = sys_env_set_status(child, ENV_RUNNABLE)) < 0)
 		panic("sys_env_set_status: %e", r);
 
+	//cprintf("spawn\n");
 	return child;
 
 error:
@@ -302,6 +308,47 @@ static int
 copy_shared_pages(envid_t child)
 {
 	// LAB 5: Your code here.
+	// uintptr_t addr;
+	// uint32_t pn;
+	// pte_t pte;
+	// int r;
+
+	// for(addr = 0; addr<UTOP; addr+=PGSIZE){
+	// 	pn = addr/PGSIZE;
+	// 	if(!(uvpd[PDX(addr)]&PTE_P))
+	// 		continue;
+	// 	pte = uvpt[pn];
+	// 	if((pte & (PTE_SHARE | PTE_P | PTE_U)) == (PTE_SHARE | PTE_P | PTE_U)){
+	// 		r = sys_page_map(0, (void*)addr, child, (void*)addr, PTE_SYSCALL & pte);
+	// 		if(r<0) panic("copy_shared_pages: sys_page_map,%e", r);
+	// 	}		
+	// }
+	// return 0;
+		// LAB 5: Your code here.
+	int r;
+	bool is_below_ulim = true;
+	for (int i = 0; is_below_ulim && i < NPDENTRIES ; i++) {
+		if (!(uvpd[i] & PTE_P)) {
+			continue;
+		}
+		for (int j = 0; is_below_ulim && j < NPTENTRIES; j++) {
+			unsigned pn = i * NPTENTRIES + j;
+			pte_t pte = uvpt[pn];
+			if (pn >= (UTOP >> PGSHIFT)) {
+				is_below_ulim = false;
+			} else if (pte & PTE_SHARE) {
+				if ((r = sys_page_map(0,
+						      (void *)(pn * PGSIZE),
+						      child,
+						      (void *)(pn * PGSIZE),
+						      pte & PTE_SYSCALL)) < 0) {
+					return r;
+				}
+			}
+		}
+	}
+
 	return 0;
+
 }
 

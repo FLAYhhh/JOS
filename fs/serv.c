@@ -63,9 +63,9 @@ serve_init(void)
 // Allocate an open file.
 int
 openfile_alloc(struct OpenFile **o)
-{
+{	
 	int i, r;
-
+	
 	// Find an available open-file table entry
 	for (i = 0; i < MAXOPEN; i++) {
 		switch (pageref(opentab[i].o_fd)) {
@@ -214,7 +214,19 @@ serve_read(envid_t envid, union Fsipc *ipc)
 		cprintf("serve_read %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
 
 	// Lab 5: Your code here:
-	return 0;
+	struct OpenFile *o;
+	int r;
+
+	if ((r = openfile_lookup(envid, req->req_fileid, &o)) < 0)
+		return r;
+	
+	ssize_t count;
+
+	assert(req->req_n <= sizeof(ret->ret_buf));
+	if((count = file_read(o->o_file, ret->ret_buf, req->req_n, o->o_fd->fd_offset))>=0)
+		o->o_fd->fd_offset += count;
+
+	return count; // count bytes on success, or error code on failure
 }
 
 
@@ -229,7 +241,31 @@ serve_write(envid_t envid, struct Fsreq_write *req)
 		cprintf("serve_write %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
 
 	// LAB 5: Your code here.
-	panic("serve_write not implemented");
+	struct OpenFile *o;
+	int r;
+
+	if((r = openfile_lookup(envid, req->req_fileid, &o)<0))
+		return r;
+
+	ssize_t count;
+	assert(req->req_n <= sizeof(req->req_buf));
+
+	if(debug){
+		cprintf("serve_write: req_n = %d\n"
+				"\t\tfile_size = %d\n"
+				"\t\tfile_off = %d\n", req->req_n, o->o_file->f_size, o->o_fd->fd_offset);
+		
+	}
+		
+
+	if((count = file_write(o->o_file, req->req_buf, req->req_n, o->o_fd->fd_offset)) >= 0)
+		o->o_fd->fd_offset += count;
+
+	if(debug)	
+		cprintf("serve_write %d bytes\n", count);
+
+	return count;
+	//panic("serve_write not implemented");
 }
 
 // Stat ipc->stat.req_fileid.  Return the file's struct Stat to the
@@ -316,7 +352,13 @@ serve(void)
 		if (req == FSREQ_OPEN) {
 			r = serve_open(whom, (struct Fsreq_open*)fsreq, &pg, &perm);
 		} else if (req < ARRAY_SIZE(handlers) && handlers[req]) {
+			if(debug && req == FSREQ_WRITE){
+				size_t n = fsreq->write.req_n;
+				fsreq->write.req_buf[n] = '0';
+				cprintf("server - write_req - info: size(%d), [%s]\n", n, fsreq->write.req_buf);
+			}
 			r = handlers[req](whom, fsreq);
+			
 		} else {
 			cprintf("Invalid request code %d from %08x\n", req, whom);
 			r = -E_INVAL;
