@@ -11,6 +11,8 @@
 #include <kern/env.h>
 #include <kern/cpu.h>
 
+#include <kern/e1000.h>
+
 // These variables are set by i386_detect_memory()
 size_t npages;			// Amount of physical memory (in pages)
 static size_t npages_basemem;	// Amount of base memory (in pages)
@@ -161,6 +163,19 @@ mem_init(void)
 	// Make 'envs' point to an array of size 'NENV' of 'struct Env'.
 	// LAB 3: Your code here.
 	envs = boot_alloc(NENV * sizeof(struct Env));
+
+
+	//////////////////////////////////////////////////////////////////////
+	// LAB 6
+	// Make 'tdba' point to an array of size 'NTD' of 'struct tx_desc'.
+	
+
+	// addr returned by boot_alloc() is page aligned, 
+	// so tdba always comfirms align requirement.
+	tdba = boot_alloc(NTD * sizeof(struct tx_desc));  
+	pkt_bufs = boot_alloc(NTD * MAX_PKT_SIZE);
+
+
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
 	// up the list of free physical pages. Once we've done so, all further

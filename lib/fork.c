@@ -84,7 +84,8 @@ pgfault(struct UTrapframe *utf)
 	if (!(err & 2)) {
 		panic("pgfault was not a write. err: %x", err);
 	} else if (!(pte & PTE_COW)) {
-		panic("pgfault is not copy on write");
+		cprintf("err:%d,  user addr: %08x\n", err, (uint32_t)addr);
+		panic("pgfault, pte is not COW");
 	}
 
 
@@ -249,7 +250,7 @@ fork(void)   //basicly done, except some bit checks.
 	extern unsigned char end[];
 	uint8_t *addr;
 	int r;
-	cprintf("user end addr is %08x\n", (uint8_t*)end);
+	//cprintf("user end addr is %08x\n", (uint8_t*)end);
 	if(envid==0){
 		//child
 		//set_pgfault_handler(pgfault);

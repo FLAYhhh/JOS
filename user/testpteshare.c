@@ -23,7 +23,7 @@ umain(int argc, char **argv)
 		// Read elf header
 		elf = (struct Elf*) elf_buf;
 		ssize_t n = readn(fd, elf_buf, sizeof(elf_buf));
-		cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
+		//cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
 
 		if ( n != sizeof(elf_buf)
 			|| elf->e_magic != ELF_MAGIC) {
@@ -34,7 +34,7 @@ umain(int argc, char **argv)
 		}
 		//close(fd);
 
-	cprintf("envid:%d\n", thisenv->env_id);
+	//cprintf("envid:%d\n", thisenv->env_id);
 	if (argc != 0)
 		childofspawn();
 
@@ -52,19 +52,19 @@ umain(int argc, char **argv)
 	cprintf("fork handles PTE_SHARE %s\n", strcmp(VA, msg) == 0 ? "right" : "wrong");
 
 	// check spawn
-	cprintf("before spawn, va is:%s\n", VA);
+	//cprintf("before spawn, va is:%s\n", VA);
 	if ((r = spawnl("/testpteshare", "testpteshare", "arg", 0)) < 0)
 		panic("spawn: %e", r);
 	wait(r);
 	cprintf("spawn handles PTE_SHARE %s\n", strcmp(VA, msg2) == 0 ? "right" : "wrong");
-	cprintf("after spawn, va is:%s\n", VA);
+	//cprintf("after spawn, va is:%s\n", VA);
 	breakpoint();
 }
 
 void
 childofspawn(void)
 {
-	cprintf("i am spawn's child\n");
+	//cprintf("i am spawn's child\n");
 	strcpy(VA, msg2);
 	exit();
 }

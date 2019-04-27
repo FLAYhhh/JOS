@@ -122,3 +122,8 @@ sys_time_msec(void)
 {
 	return (unsigned int) syscall(SYS_time_msec, 0, 0, 0, 0, 0, 0);
 }
+
+int 
+sys_tx_pkt(uint8_t *buff, uint32_t len){
+	return (int) syscall(SYS_tx_pkt, 1, (uint32_t)buff, len, 0, 0, 0);
+}

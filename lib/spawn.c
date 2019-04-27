@@ -95,7 +95,7 @@ spawn(const char *prog, const char **argv)
 	if ( n != sizeof(elf_buf)
 	    || elf->e_magic != ELF_MAGIC) {
 		close(fd);
-		cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
+		//cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
 		return -E_NOT_EXEC;
 	}
 
