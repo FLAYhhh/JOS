@@ -103,6 +103,8 @@ umain(int argc, char **argv)
 		if (req != NSREQ_INPUT)
 			panic("Unexpected IPC %d", req);
 
+		cprintf("testinput.c: IPC INPUT success\n");
+		cprintf("whom:%08x, perm:%08x\n", whom, perm);
 		hexdump("input: ", pkt->jp_data, pkt->jp_len);
 		cprintf("\n");
 

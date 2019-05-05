@@ -13,6 +13,7 @@
 #include <kern/sched.h>
 #include <kern/time.h>
 #include <kern/e1000.h>
+#include <inc/ns.h>
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
 // Destroys the environment on memory errors.
@@ -440,6 +441,11 @@ sys_tx_pkt(uint8_t *buff, uint32_t len){
 	return tx_pkt(buff, len);
 }
 
+static int 
+sys_rx_pkt(struct jif_pkt *pkt){
+	user_mem_assert(curenv, (void*)pkt, PGSIZE, PTE_P|PTE_U);
+	return rx_pkt(pkt);
+}
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5)
@@ -497,6 +503,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			break;
 		case SYS_tx_pkt:
 			return sys_tx_pkt((uint8_t *)a1, a2);
+			break;
+		case SYS_rx_pkt:
+			return sys_rx_pkt((struct jif_pkt *)a1);
 			break;
 		default:
 			return -E_INVAL;

@@ -168,12 +168,18 @@ mem_init(void)
 	//////////////////////////////////////////////////////////////////////
 	// LAB 6
 	// Make 'tdba' point to an array of size 'NTD' of 'struct tx_desc'.
-	
+	// Make 'rdba' point to an array of size 'NRD' of 'struct rx_desc'.
 
 	// addr returned by boot_alloc() is page aligned, 
-	// so tdba always comfirms align requirement.
+	// so tdba/rdba always comfirms align requirement.
 	tdba = boot_alloc(NTD * sizeof(struct tx_desc));  
+	cprintf("E1000- tdba start:%08x, size:%08x\n", tdba, NTD * sizeof(struct tx_desc));
 	pkt_bufs = boot_alloc(NTD * MAX_PKT_SIZE);
+	cprintf("E1000- pkt_bufs start:%08x, size:%08x\n", pkt_bufs, NTD * MAX_PKT_SIZE);
+	rdba = boot_alloc(NRD * sizeof(struct rx_desc));
+	cprintf("E1000- rdba start:%08x, size:%08x\n", rdba, NRD * sizeof(struct rx_desc));
+	rx_bufs = boot_alloc(NRD * RX_BUF_SIZE);
+	cprintf("E1000- rx_bufs start:%08x, size:%08x\n", rx_bufs, NRD * RX_BUF_SIZE);
 
 
 	//////////////////////////////////////////////////////////////////////

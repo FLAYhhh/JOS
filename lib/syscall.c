@@ -127,3 +127,8 @@ int
 sys_tx_pkt(uint8_t *buff, uint32_t len){
 	return (int) syscall(SYS_tx_pkt, 1, (uint32_t)buff, len, 0, 0, 0);
 }
+
+int
+sys_rx_pkt(struct jif_pkt *pkt){
+	return (int) syscall(SYS_rx_pkt, 1, (uint32_t)pkt, 0, 0, 0, 0);
+}
