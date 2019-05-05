@@ -221,9 +221,12 @@ serve_read(envid_t envid, union Fsipc *ipc)
 		return r;
 	
 	ssize_t count;
-
-	assert(req->req_n <= sizeof(ret->ret_buf));
-	if((count = file_read(o->o_file, ret->ret_buf, req->req_n, o->o_fd->fd_offset))>=0)
+	ssize_t req_n = req->req_n;
+	
+	//assert(req->req_n <= sizeof(ret->ret_buf));
+	if(req->req_n > sizeof(ret->ret_buf))
+		req_n = sizeof(ret->ret_buf);
+	if((count = file_read(o->o_file, ret->ret_buf, req_n, o->o_fd->fd_offset))>=0)
 		o->o_fd->fd_offset += count;
 
 	return count; // count bytes on success, or error code on failure
