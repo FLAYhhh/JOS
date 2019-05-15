@@ -2,6 +2,8 @@
    Define or describe the layout in disk.
    In other words, the file system format is here.  
 */
+#ifndef LOS_FS
+#define LOS_FS
 
 #include<sys/types.h>
 #include<stdint.h>
@@ -73,3 +75,5 @@ struct stat {
   uint size;   // Size of file in bytes
 };
 
+
+#endif

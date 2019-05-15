@@ -5,8 +5,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<assert.h>
-#include "new_fs_params.h"
-#include "new_fs.h"
+#include "los_fs_params.h"
+#include "los_fs.h"
 
 #define NINODES  200
 
