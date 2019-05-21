@@ -129,7 +129,7 @@ _alltraps:
   movw %ax, %es
 
 
-  # Call trap(tf), where tf=%esp
+  # Call trap(tf), where tf=%esp, so %esp is a param
   pushl %esp
   call trap
   addl $4, %esp
