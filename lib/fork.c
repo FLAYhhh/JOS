@@ -284,6 +284,14 @@ fork(void)   //basicly done, except some bit checks.
 		
 		//envs[ENVX(envid)].env_pgfault_upcall = thisenv->env_pgfault_upcall;
 		//duppage(envid,(uintptr_t)ROUNDDOWN(&addr, PGSIZE)/PGSIZE);
+
+		
+		// why should we alloc a uxstack when creating a process?/ why not cow?
+		// Ans:
+		// 	uxstack cannot be cow, because if it's cow, then, when calling page fault
+		// 	handle, it will try to write to uxstack, but it's cow, so you encount a pagefault
+		// 	again, and you keep going invoke the page fault handle and so on... it will be endless
+
 		sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_P | PTE_W | PTE_U);
 
 		sys_env_set_status(envid, ENV_RUNNABLE);

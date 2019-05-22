@@ -411,10 +411,10 @@ page_fault_handler(struct Trapframe *tf)
 			//*(uint32_t*)(UXSTACKTOP-3-sizeof(struct PushRegs)-1) = curenv->env_tf.tf_err;
 			//*(uint32_t*)(UXSTACKTOP-3-sizeof(struct PushRegs)-2) = fault_va;
 			curenv->env_tf.tf_esp = UXSTACKTOP - sizeof(struct UTrapframe);
-			*(struct UTrapframe *)curenv->env_tf.tf_esp = utf;
+			*(struct UTrapframe *)(curenv->env_tf.tf_esp) = utf;
 		}else if(UXSTACKTOP-PGSIZE <= curenv->env_tf.tf_esp && curenv->env_tf.tf_esp < UXSTACKTOP){
 			curenv->env_tf.tf_esp = curenv->env_tf.tf_esp - sizeof(struct UTrapframe);
-			*(struct UTrapframe *)curenv->env_tf.tf_esp = utf;
+			*(struct UTrapframe *)(curenv->env_tf.tf_esp) = utf;
 		}
 		curenv->env_tf.tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
 		return;
