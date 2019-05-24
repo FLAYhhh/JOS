@@ -295,7 +295,7 @@ umain(int argc, char **argv)
 		char *buf;
 		buf = readline("$ ");
 
-//		buf = readline(interactive ? "$ " : NULL);
+		buf = readline(interactive ? "$ " : NULL);
 		if (buf == NULL) {
 			if (debug)
 				cprintf("EXITING\n");
