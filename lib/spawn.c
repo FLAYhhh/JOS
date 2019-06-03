@@ -307,7 +307,7 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 static int
 copy_shared_pages(envid_t child)
 {
-	// LAB 5: Your code here.
+	// LAB 5:  
 	// uintptr_t addr;
 	// uint32_t pn;
 	// pte_t pte;
@@ -324,7 +324,7 @@ copy_shared_pages(envid_t child)
 	// 	}		
 	// }
 	// return 0;
-		// LAB 5: Your code here.
+		// LAB 5:  
 	int r;
 	bool is_below_ulim = true;
 	for (int i = 0; is_below_ulim && i < NPDENTRIES ; i++) {

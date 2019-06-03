@@ -72,7 +72,6 @@ trap_init(void)
 {
 	extern struct Segdesc gdt[];
 
-	// LAB 3: Your code here.
 	int i;
 	for(i=0; i<48; i++){
 		SETGATE(idt[i], 0, GD_KT, vectors[i], 0);
@@ -114,7 +113,7 @@ trap_init_percpu(void)
 	// wrong, you may not get a fault until you try to return from
 	// user space on that CPU.
 	//
-	// LAB 4: Your code here:
+
 
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
@@ -185,7 +184,7 @@ static void
 trap_dispatch(struct Trapframe *tf)
 {
 	// Handle processor exceptions.
-	// LAB 3: Your code here.
+
 	if(tf->tf_trapno == T_PGFLT){
 		page_fault_handler(tf);
 		return;
@@ -234,12 +233,12 @@ trap_dispatch(struct Trapframe *tf)
 	}
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
-	// LAB 4: Your code here.
+	// LAB 4:  
 
 	// Add time tick increment to clock interrupts.
 	// Be careful! In multiprocessors, clock interrupts are
 	// triggered on every CPU.
-	// LAB 6: Your code here.
+	// LAB 6:  
 	if (tf->tf_trapno == IRQ_OFFSET + IRQ_TIMER){
 		//cprintf("handle IRQ_TIMER\n");
 		lapic_eoi();
@@ -249,7 +248,7 @@ trap_dispatch(struct Trapframe *tf)
 
 
 	// Handle keyboard and serial interrupts.
-	// LAB 5: Your code here.
+	// LAB 5:  
 	if (tf->tf_trapno == IRQ_OFFSET + IRQ_KBD){
 		kbd_intr();
 		return ;
@@ -293,7 +292,7 @@ trap(struct Trapframe *tf)
 		// Trapped from user mode.
 		// Acquire the big kernel lock before doing any
 		// serious kernel work.
-		// LAB 4: Your code here.
+		// LAB 4:  
 		lock_kernel();
 		assert(curenv);
 
@@ -339,7 +338,7 @@ page_fault_handler(struct Trapframe *tf)
 
 	// Handle kernel-mode page faults.
 
-	// LAB 3: Your code here.
+	// LAB 3:  
 
 	if(!(tf->tf_cs & 1)){  // kern
 		print_trapframe(tf);
@@ -379,7 +378,7 @@ page_fault_handler(struct Trapframe *tf)
 	//   To change what the user environment runs, modify 'curenv->env_tf'
 	//   (the 'tf' variable points at 'curenv->env_tf').
 
-	// LAB 4: Your code here.
+	// LAB 4:  
 	
 	//pgfault_handle 进行处理时必须要使用exception stack,
 	//所以使用exception stack时不能出现pgfault.否则,就会一直递归下去.

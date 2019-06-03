@@ -18,7 +18,7 @@ input(envid_t ns_envid)
 	int r;
 	if ((r = sys_page_alloc(0, pkt, PTE_P|PTE_U|PTE_W)) < 0)
 		panic("sys_page_map: %e", r);
-	cprintf("input.c: pkt:%08x\n", pkt);
+	//cprintf("input.c: pkt:%08x\n", pkt);
 
 	while(1){
 		int cnt = 0;
@@ -27,7 +27,7 @@ input(envid_t ns_envid)
 				//cprintf("input try to rx_pkt, cnt:%d\n", cnt);
 			cnt +=1;
 		}
-		cprintf("input.c: befor send, pkt:%08x\n", pkt);
+		//cprintf("input.c: befor send, pkt:%08x\n", pkt);
 		ipc_send(ns_envid, NSREQ_INPUT, (void*)pkt, PTE_P |  PTE_U | PTE_W);
 		
 		int i;

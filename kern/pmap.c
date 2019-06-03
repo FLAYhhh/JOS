@@ -1,5 +1,3 @@
-/* See COPYRIGHT for copyright information. */
-
 #include <inc/x86.h>
 #include <inc/mmu.h>
 #include <inc/error.h>
@@ -23,9 +21,7 @@ struct PageInfo *pages;		// Physical page state array
 static struct PageInfo *page_free_list;	// Free list of physical pages
 
 
-// --------------------------------------------------------------
 // Detect machine's physical memory setup.
-// --------------------------------------------------------------
 
 static int
 nvram_read(int r)
@@ -61,9 +57,8 @@ i386_detect_memory(void)
 }
 
 
-// --------------------------------------------------------------
 // Set up memory mappings above UTOP.
-// --------------------------------------------------------------
+
 
 static void mem_init_mp(void);
 static void boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm);
@@ -106,7 +101,7 @@ boot_alloc(uint32_t n)
 	// nextfree.  Make sure nextfree is kept aligned
 	// to a multiple of PGSIZE.
 	//
-	// LAB 2: Your code here.
+
 	result = nextfree;
 	nextfree = ROUNDUP(nextfree+n, PGSIZE);
 	if(PADDR(nextfree) > (npages<<PGSHIFT))
@@ -161,7 +156,7 @@ mem_init(void)
 
 	//////////////////////////////////////////////////////////////////////
 	// Make 'envs' point to an array of size 'NENV' of 'struct Env'.
-	// LAB 3: Your code here.
+
 	envs = boot_alloc(NENV * sizeof(struct Env));
 
 
@@ -173,13 +168,13 @@ mem_init(void)
 	// addr returned by boot_alloc() is page aligned, 
 	// so tdba/rdba always comfirms align requirement.
 	tdba = boot_alloc(NTD * sizeof(struct tx_desc));  
-	cprintf("E1000- tdba start:%08x, size:%08x\n", tdba, NTD * sizeof(struct tx_desc));
+	//cprintf("E1000- tdba start:%08x, size:%08x\n", tdba, NTD * sizeof(struct tx_desc));
 	pkt_bufs = boot_alloc(NTD * MAX_PKT_SIZE);
-	cprintf("E1000- pkt_bufs start:%08x, size:%08x\n", pkt_bufs, NTD * MAX_PKT_SIZE);
+	//cprintf("E1000- pkt_bufs start:%08x, size:%08x\n", pkt_bufs, NTD * MAX_PKT_SIZE);
 	rdba = boot_alloc(NRD * sizeof(struct rx_desc));
-	cprintf("E1000- rdba start:%08x, size:%08x\n", rdba, NRD * sizeof(struct rx_desc));
+	//cprintf("E1000- rdba start:%08x, size:%08x\n", rdba, NRD * sizeof(struct rx_desc));
 	rx_bufs = boot_alloc(NRD * RX_BUF_SIZE);
-	cprintf("E1000- rx_bufs start:%08x, size:%08x\n", rx_bufs, NRD * RX_BUF_SIZE);
+	//cprintf("E1000- rx_bufs start:%08x, size:%08x\n", rx_bufs, NRD * RX_BUF_SIZE);
 
 
 	//////////////////////////////////////////////////////////////////////
@@ -217,7 +212,7 @@ mem_init(void)
 	// Permissions:
 	//    - the new image at UENVS  -- kernel R, user R
 	//    - envs itself -- kernel RW, user NONE
-	// LAB 3: Your code here.
+
 	uint32_t nenvs_end = ROUNDUP(NENV * sizeof(struct Env), PGSIZE);
 	for(i = 0; i < nenvs_end; i += PGSIZE){
 		page_insert(kern_pgdir, pa2page(PADDR((char*)envs+i)), (void*)(UENVS+i), PTE_U|PTE_P);
@@ -232,7 +227,7 @@ mem_init(void)
 	//       the kernel overflows its stack, it will fault rather than
 	//       overwrite memory.  Known as a "guard page".
 	//     Permissions: kernel RW, user NONE
-	// Your code goes here:
+
 	for (i = 0; i < KSTKSIZE; i += PGSIZE)
 		page_insert(kern_pgdir, pa2page(PADDR(bootstack + i)), (void*)(KSTACKTOP-KSTKSIZE + i), PTE_W|PTE_P);
 	
@@ -244,7 +239,7 @@ mem_init(void)
 	// We might not have 2^32 - KERNBASE bytes of physical memory, but
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
-	// Your code goes here:
+
 	boot_map_region(kern_pgdir, KERNBASE, 0xffffffff-KERNBASE+1, 0, PTE_P|PTE_W);
 
 	// Initialize the SMP-related parts of the memory map
@@ -296,7 +291,7 @@ mem_init_mp(void)
 	//             Known as a "guard page".
 	//     Permissions: kernel RW, user NONE
 	//
-	// LAB 4: Your code here:
+	
 	int i=0;
 	uintptr_t va = KSTACKTOP;
 	for(; i<NCPU; i++){
@@ -615,7 +610,7 @@ mmio_map_region(physaddr_t pa, size_t size)
 	//
 	// Hint: The staff solution uses boot_map_region.
 	//
-	// Your code here:
+
 	uintptr_t addr_ret = base;
 	assert(pa%PGSIZE == 0);
 	boot_map_region(kern_pgdir, base, ROUNDUP(size, PGSIZE), pa, PTE_W|PTE_PCD|PTE_PWT);
@@ -648,7 +643,6 @@ static uintptr_t user_mem_check_addr;
 int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
-	// LAB 3: Your code here.
 	const void *addr = va, *addr_end;
 	addr = ROUNDDOWN(addr, PGSIZE);
 	addr_end = ROUNDUP( addr + len, PGSIZE);

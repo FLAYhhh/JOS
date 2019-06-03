@@ -26,7 +26,7 @@ pgfault(struct UTrapframe *utf)
 	//   Use the read-only page table mappings at uvpt
 	//   (see <inc/memlayout.h>).
 
-	// LAB 4: Your code here.
+	// LAB 4:  
 	pte_t pte = uvpt[(uintptr_t)addr >> PGSHIFT];
 
 	if (!(err & 2)) {
@@ -40,7 +40,7 @@ pgfault(struct UTrapframe *utf)
 	// page to the old page's address.
 	// Hint:
 	//   You should make three system calls.
-	// LAB 4: Your code here.
+	// LAB 4:  
 	int perm = PTE_P | PTE_U | PTE_W;
 	if ((r = sys_page_alloc(0, UTEMP, perm)) < 0) {
 		panic("sys_page_alloc: %e", r);
@@ -72,7 +72,7 @@ pgfault(struct UTrapframe *utf)
 static int
 duppage(envid_t envid, unsigned pn)
 {
-	// LAB 4: Your code here.
+	// LAB 4:  
 	int r;
 	pte_t pte = uvpt[pn];
 
@@ -131,7 +131,7 @@ duppage(envid_t envid, unsigned pn)
 envid_t
 fork(void)
 {
-	// LAB 4: Your code here.
+	// LAB 4:  
 	set_pgfault_handler(pgfault);
 
 	envid_t envid = sys_exofork();

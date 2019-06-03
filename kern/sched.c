@@ -28,7 +28,7 @@ sched_yield(void)
 	// no runnable environments, simply drop through to the code
 	// below to halt the cpu.
 
-	// LAB 4: Your code here.
+	// LAB 4:  
 
 	//struct Env *pre_env = NULL;
 	int pre_idx = 0, idx = 0;

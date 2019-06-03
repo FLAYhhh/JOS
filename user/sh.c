@@ -54,7 +54,7 @@ again:
 			// If not, dup 'fd' onto file descriptor 0,
 			// then close the original 'fd'.
 
-			// LAB 5: Your code here.
+			// LAB 5:  
 			panic("< redirection not implemented");
 			break;
 

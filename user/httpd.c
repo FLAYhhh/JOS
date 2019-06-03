@@ -76,7 +76,7 @@ send_header(struct http_request *req, int code)
 static int
 send_data(struct http_request *req, int fd)
 {
-	// LAB 6: Your code here.
+	// LAB 6:  
 	panic("send_data not implemented");
 }
 
@@ -222,7 +222,7 @@ send_file(struct http_request *req)
 	// if the file is a directory, send a 404 error using send_error
 	// set file_size to the size of the file
 
-	// LAB 6: Your code here.
+	// LAB 6:  
 	panic("send_file not implemented");
 
 	if ((r = send_header(req, 200)) < 0)

@@ -118,7 +118,6 @@ void
 env_init(void)
 {
 	// Set up envs array
-	// LAB 3: Your code here. 
 	int i;
 	for(i=NENV-1; i>=0; i--){
 		envs[i].env_status = ENV_FREE;
@@ -187,7 +186,7 @@ env_setup_vm(struct Env *e)
 	//	pp_ref for env_free to work correctly.
 	//    - The functions in kern/pmap.h are handy.
 
-	// LAB 3: Your code here.
+	// LAB 3:  
 	p->pp_ref ++;
 	memcpy(page2kva(p), kern_pgdir, PGSIZE);
 	e->env_pgdir = page2kva(p);
@@ -255,7 +254,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	// You will set e->env_tf.tf_eip later.
 
 	// Enable interrupts while in user mode.
-	// LAB 4: Your code here.
+	// LAB 4:  
 	e->env_tf.tf_eflags = FL_IF;
 	// Clear the page fault handler until user installs one.
 	e->env_pgfault_upcall = 0;
@@ -281,7 +280,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 static void
 region_alloc(struct Env *e, void *va, size_t len)
 {
-	// LAB 3: Your code here.
+	// LAB 3:  
 	// (But only if you need it for load_icode.)
 	//
 	// Hint: It is easier to use region_alloc if the caller can pass
@@ -353,7 +352,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	//  to make sure that the environment starts executing there.
 	//  What?  (See env_run() and env_pop_tf() below.)
 
-	// LAB 3: Your code here.
+	// LAB 3:  
 
 	// load each program segment 
 	
@@ -377,7 +376,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	// Now map one page for the program's initial stack
 	// at virtual address USTACKTOP - PGSIZE.
 
-	// LAB 3: Your code here.
+	// LAB 3:  
 	region_alloc(e, (void *)(USTACKTOP-2*PGSIZE), 2*PGSIZE);
 	
 }
@@ -392,7 +391,7 @@ load_icode(struct Env *e, uint8_t *binary)
 void
 env_create(uint8_t *binary, enum EnvType type)
 {
-	// LAB 3: Your code here.
+	// LAB 3:  
 	struct Env *new_env;
 	int r;
 	if((r = env_alloc(&new_env, 0))) panic("env_create: %e\n", r);
@@ -400,7 +399,7 @@ env_create(uint8_t *binary, enum EnvType type)
 	new_env->env_type = type;
 	
 	// If this is the file server (type == ENV_TYPE_FS) give it I/O privileges.
-	// LAB 5: Your code here.
+	// LAB 5:  
 	if(type == ENV_TYPE_FS)
 		new_env->env_tf.tf_eflags |= FL_IOPL_3;
 }
@@ -532,7 +531,7 @@ env_run(struct Env *e)
 	//	and make sure you have set the relevant parts of
 	//	e->env_tf to sensible values.
 
-	// LAB 3: Your code here.
+	// LAB 3:  
 	if(curenv){
 		if(curenv->env_status == ENV_RUNNING)
 			curenv->env_status = ENV_RUNNABLE;

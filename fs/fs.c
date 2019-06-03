@@ -61,7 +61,7 @@ alloc_block(void)
 	// contains the in-use bits for BLKBITSIZE blocks.  There are
 	// super->s_nblocks blocks in the disk altogether.
 
-	// LAB 5: Your code here.
+	// LAB 5:  
 	uint32_t blkno;
 	uint32_t *p = bitmap;
 	int i=0, j=0;
@@ -154,7 +154,7 @@ fs_init(void)
 static int
 file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
 {
-       // LAB 5: Your code here.
+       // LAB 5:  
         if(filebno < NDIRECT)  
 			*ppdiskbno = &f->f_direct[filebno]; 
 		else if(filebno < NDIRECT + NINDIRECT){
@@ -189,7 +189,7 @@ file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool all
 int
 file_get_block(struct File *f, uint32_t filebno, char **blk)
 {
-       // LAB 5: Your code here.
+       // LAB 5:  
 	    if(filebno >= NDIRECT + NINDIRECT)
 		  	return -E_INVAL;
 

@@ -24,7 +24,7 @@
 // 	//   Use the read-only page table mappings at uvpt
 // 	//   (see <inc/memlayout.h>).
 
-// 	// LAB 4: Your code here.
+// 	// LAB 4:  
 // 	//if(!(uvpd[PDX(addr)]&PTE_P))
 // 	//		panic("pgfault: user space, invalid addr\n");
 
@@ -47,7 +47,7 @@
 // 	// Hint:
 // 	//   You should make three system calls.
 
-// 	// LAB 4: Your code here.
+// 	// LAB 4:  
 	
 // 	pte &= ~PTE_COW;
 // 	pte |= PTE_W;
@@ -78,7 +78,7 @@ pgfault(struct UTrapframe *utf)
 	//   Use the read-only page table mappings at uvpt
 	//   (see <inc/memlayout.h>).
 
-	// LAB 4: Your code here.
+	// LAB 4:  
 	pte_t pte = uvpt[(uintptr_t)addr >> PGSHIFT];
 
 	if (!(err & 2)) {
@@ -101,7 +101,7 @@ pgfault(struct UTrapframe *utf)
 	// page to the old page's address.
 	// Hint:
 	//   You should make three system calls.
-	// LAB 4: Your code here.
+	// LAB 4:  
 	pte &= ~PTE_COW;
 	pte |= PTE_W;
 	int perm = PTE_SYSCALL & pte;
@@ -136,7 +136,7 @@ pgfault(struct UTrapframe *utf)
 // static int
 // duppage(envid_t envid, unsigned pn)
 // {
-// 	// LAB 4: Your code here.
+// 	// LAB 4:  
 // 	int r;
 
 // 	if(!(uvpd[PDX(pn*PGSIZE)] & PTE_P)
@@ -179,7 +179,7 @@ pgfault(struct UTrapframe *utf)
 static int
 duppage(envid_t envid, unsigned pn)
 {
-	// LAB 4: Your code here.
+	// LAB 4:  
 	int r;
 	pte_t pte = uvpt[pn];
 
@@ -240,7 +240,7 @@ duppage(envid_t envid, unsigned pn)
 envid_t
 fork(void)   //basicly done, except some bit checks.
 {
-	// LAB 4: Your code here.
+	// LAB 4:  
 	set_pgfault_handler(pgfault);
 
 	envid_t envid;

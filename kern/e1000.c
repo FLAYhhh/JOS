@@ -75,7 +75,7 @@ static void  init_tx(){
     init_tctl.ct = 0x10;
     init_tctl.cold = 0x40;
     e1000_bar0[TCTL>>2] = *(uint32_t *)(&init_tctl);
-    cprintf("TCTL val: %08x\n", e1000_bar0[TCTL>>2]);
+    //cprintf("TCTL val: %08x\n", e1000_bar0[TCTL>>2]);
     // initialize transmit IPG
     e1000_bar0[TIPG>>2] = (6<<20) + (4<<10) + 10;
     //cprintf("debug e1000 test register[i] val: %08x\n", e1000_bar0[2]);
@@ -100,12 +100,12 @@ static void init_rx(){
 
 
     e1000_bar0[RAL>>2] = 0x12005452;
-    cprintf("RAL:%08x\n", e1000_bar0[RAL>>2]);
+    //cprintf("RAL:%08x\n", e1000_bar0[RAL>>2]);
     e1000_bar0[RAH>>2] = (0x00005634 | (1<<31));
-    cprintf("RAH:%08x\n", e1000_bar0[RAH>>2]);
+    //cprintf("RAH:%08x\n", e1000_bar0[RAH>>2]);
     //memset((void*)&e1000_bar0[MTA>>2], 0, 512);
     e1000_bar0[MTA>>2] = 0;
-    cprintf("MTA:%08x\n", e1000_bar0[MTA>>2]);
+    //cprintf("MTA:%08x\n", e1000_bar0[MTA>>2]);
     // struct ims  ims_val;
     // memset((void*)(&ims_val), 0, sizeof(struct ims));
     // ims_val.rxt0 = 1;
@@ -118,15 +118,15 @@ static void init_rx(){
 
     //rd  ring
     e1000_bar0[RDBAL>>2] = PADDR(rdba);
-    cprintf("RDBAL:%08x\n", e1000_bar0[RDBAL>>2]);
+    //cprintf("RDBAL:%08x\n", e1000_bar0[RDBAL>>2]);
     e1000_bar0[RDBAH>>2] = 0;
-    cprintf("RDBAH:%08x\n", e1000_bar0[RDBAH>>2]);
+    //cprintf("RDBAH:%08x\n", e1000_bar0[RDBAH>>2]);
     e1000_bar0[RDLEN>>2]    = NRD * sizeof(struct rx_desc);
-    cprintf("RDLEN:%08x\n", e1000_bar0[RDLEN>>2]);
+    //cprintf("RDLEN:%08x\n", e1000_bar0[RDLEN>>2]);
     e1000_bar0[RDH>>2]      = 0;
-    cprintf("RDH:%08x\n", e1000_bar0[RDH>>2]);
+    //cprintf("RDH:%08x\n", e1000_bar0[RDH>>2]);
     e1000_bar0[RDT>>2]      = NRD-1;
-    cprintf("RDT:%08x\n", e1000_bar0[RDT>>2]);
+    //cprintf("RDT:%08x\n", e1000_bar0[RDT>>2]);
 
     struct rctl  rctl_val;
     *(uint32_t *)(&rctl_val) = 0;
@@ -141,7 +141,7 @@ static void init_rx(){
     rctl_val.bam = 1;
     rctl_val.lbm = 0b11;
     e1000_bar0[RCTL>>2] = *(uint32_t*)(&rctl_val);
-    cprintf("RCTL val: %08x\n", e1000_bar0[RCTL>>2]);
+    //cprintf("RCTL val: %08x\n", e1000_bar0[RCTL>>2]);
 }
 
 // transmit function: transmit a packet
